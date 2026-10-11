@@ -14,6 +14,19 @@ Two engines, used for different questions:
 | Best for | Every build, every swap, A/B tests, sweeps | Headline power rating, overnight gauntlets, calibration |
 | Weakness | No opponents, no interaction | Forge AI misplays combo/politics; some cards AI-unplayable; slow, noisy |
 
+## Status
+
+| Piece | State |
+| --- | --- |
+| Goldfish v0 (`packages/sim`): RNG, mulligans, lands/rocks/dorks/ramp, commander turn, screw/flood, mana by turn, paired A/B | **Built 2026-10-11**, validated against hypergeometric math, ~0.2 s per 10k games |
+| Card → `SimCard` mapping from real data | Phase 1 (needs the card DB) |
+| Full sim profiles, win-con/combo assembly, combat clock, draw engines, tutors | Phase 2 |
+| Sweeps, card impact, mulligan guide, worker threads | Phase 2 |
+| Forge pod lab | Phase 2 |
+
+API today: `runGoldfish(deck, { games, seed, maxTurns, keepPolicy, ... })`, `compareGoldfish(a, b, opts)`,
+`playGame(deck, rng, opts)`, stats helpers (`summarize`, `proportion`, `pairedDifference`, `hypergeomPmf`).
+
 ---
 
 ## Part A — Goldfish lab
@@ -46,9 +59,9 @@ Profile builders, in order: Scryfall function tags (`otag:`) → oracle-text par
 Seeded RNG (xoshiro128**), one game = up to `maxTurns` (default 12).
 
 1. **Shuffle + opening hand.** London mulligan with the **free first mulligan** used in multiplayer Commander.
-   Keep policy is a pluggable function; default:
-   keep if 3–5 lands, or 2 lands + ≥ 2 cheap mana sources (MV ≤ 2), and at least one castable play by turn 2.
-   Record mulligans taken.
+   Keep policy is a pluggable function; default (implemented in v0):
+   keep if 3–5 lands, or 2 lands + ≥ 1 cheap mana source (MV ≤ 2); at ≤ 5 cards keep 2–4 lands; forced keep at
+   4 cards. Bottoming keeps ≈ 3/7 lands, then mana sources, then spells, cheapest first. Record mulligans taken.
 2. **Draw step.** Multiplayer: nobody skips the first draw (comprehensive rules 103.8). Seat position configurable.
 3. **Land drop.** Choose the land that fixes the most needed colors for spells in hand; prefer tapped lands on
    turns where the extra mana can't be used.
@@ -71,7 +84,7 @@ combat damage is unblocked × evasion factor.
   opponent (and ≥ 120 for the whole table); alt-win: condition met
 - **Engine-online turn**: first turn a draw engine or key engine piece is on the battlefield
 - Mana screw (≤ 2 lands on turn 4, or a missing color needed by ≥ 2 cards in hand on turn 4)
-- Flood (≥ 7 lands and ≤ 1 spell in hand on turn 7)
+- Flood (lands are ≥ 55% of the cards seen by turn 7; configurable)
 - Cards drawn, cards cast, **dead cards** (drawn but never castable or never worth casting by turn 10)
 - Mulligans taken; final kept hand
 

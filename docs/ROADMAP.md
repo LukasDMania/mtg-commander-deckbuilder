@@ -3,14 +3,19 @@
 Five phases, about 26 weeks for one developer (rough estimates). **A phase starts only after the previous gate
 passes.** Work tasks top to bottom; tick `[x]` when done; log surprises in `docs/phases/phase-N.md`.
 
-Current phase: **Phase 0**
+Current phase: **Phase 0** — start with the Tooling and Scryfall tasks.
+
+Done early (2026-10-11, from a cloud session without access to card data): the pure-logic parts of Phase 1
+— deck parser/exporter, validator, bracket rules, goldfish v0. See `docs/phases/phase-1.md` for what was built,
+what's left, and what must be verified against real data.
 
 ---
 
 ## Phase 0 — Data foundation (weeks 1–3)
 
 Tooling
-- [ ] npm workspaces, TypeScript strict, Vitest, ESLint + Prettier, `npm run check` (typecheck + lint + test)
+- [x] npm workspaces, TypeScript strict, Vitest, `npm run check` (typecheck + test)
+- [ ] ESLint + Prettier, add lint to `npm run check`
 - [ ] `.env` loading; SQL Server connection helper in `packages/data` (`mssql`); connection smoke test
 - [ ] Migration runner: applies `db/schema.sql` then `db/migrations/*.sql` in order, tracks applied files
 
@@ -20,6 +25,10 @@ Scryfall
 - [ ] Import `card` (oracle-level) incl. color identity, legality, `game_changer` flag; `card_printing` with
       `prices.eur` / `eur_foil` / `usd`; `card_price_history` daily row
 - [ ] Cheapest € printing per card view (`v_card_price`)
+- [ ] Map card data to `@cdb/rules` `CardInfo`: `canBeCommander` (legendary creature, "can be your commander",
+      Background), `partnerKinds`/`partnerWith` (Partner, Partner with, Friends forever, Choose a Background,
+      Background, Doctor's companion, Time Lord Doctor), `anyNumberAllowed` / `maxCopies` (oracle text), basic-land
+      color identity as Scryfall reports it; a SQL-backed `CardLookup`
 - [ ] Confirm how the Game Changer flag appears in bulk data (field name) vs `is:gamechanger` search; document it
 
 EDHREC (see `docs/EDHREC.md`)
@@ -54,12 +63,16 @@ commander × bracket returns Top Cards and High Lift Cards with inclusion %, lif
 ## Phase 1 — Deck engine as an MCP server (weeks 4–9)
 
 Rules (`packages/rules`, test-first)
-- [ ] Deck model + parser/exporter for plain text, Moxfield and Archidekt formats
-- [ ] Validator: 100 cards incl. commander(s); singleton with exceptions (basics, "any number" cards); color
-      identity incl. partners/backgrounds/companions; Commander legality; € total vs budget
-- [ ] Bracket rules: Game Changer count, mass land denial, chained extra turns, two-card combos via Spellbook
-      (`estimate-bracket`); bracket report object
-- [ ] Role counts, curve, colored-source counts vs brief targets → warnings
+- [x] Deck model + parser/exporter for plain text, Moxfield and Archidekt formats (verify Moxfield's import of
+      our text export on the PC)
+- [x] Validator: 100 cards incl. commander(s); singleton with exceptions (basics, "any number" cards); color
+      identity incl. partners/backgrounds; Commander legality; € total vs budget (companion legality: not yet)
+- [x] Bracket rules engine: policy table, Game Changer count, mass land denial, extra turns, two-card combos via
+      `ComboInfo`; minimum-bracket report with reasons
+- [ ] Feed real combos: Commander Spellbook → `ComboInfo` (decide the `early` rule, e.g. Spellbook tag or total
+      MV ≤ 6) and the `mass-land-denial` / `extra-turn` role tags
+- [ ] Role counts, curve, colored-source counts vs brief targets → warnings (stats exist in `validateDeck().stats`;
+      comparison with the brief and colored sources not yet)
 - [ ] Mana base builder: land count from curve + ramp, color weighting by pips, nonbasics within leftover budget
 
 Candidate pools (`packages/data`)
@@ -72,8 +85,10 @@ Candidate pools (`packages/data`)
 - [ ] Meme mode search: names, flavor text, creature types, Scryfall art tags; theme-fidelity score
 
 Goldfish v0 (`packages/sim`, early slice — see `docs/SIMULATION.md`)
-- [ ] Seeded RNG, London + free mulligan, land/mana-only simulation; screw/flood/mana-by-turn metrics
-- [ ] Hypergeometric validation tests
+- [x] Seeded RNG, London + free mulligan, land/mana-only simulation; screw/flood/mana-by-turn metrics
+- [x] Hypergeometric validation tests
+- [x] Paired A/B with common random numbers (`compareGoldfish`) — pulled forward from Phase 2
+- [ ] Map real cards to v0 `SimCard` kinds (land / rock / dork / ramp / spell) from role tags + oracle text
 
 MCP server (`apps/server`)
 - [ ] MCP server (stdio) registered in Claude Desktop config; tools: `get_commander`, `get_edhrec_cards`,
@@ -97,7 +112,7 @@ Goldfish lab (full — `docs/SIMULATION.md` Part A)
 - [ ] Full game loop: ramp, rocks/dorks, draw bursts/engines, tutors, cost reducers, commander + tax, combo/win-con
       assembly, combat clock, held interaction
 - [ ] Metrics with P10/P50/P90 + bootstrap CIs; consistency score; worker_threads; 10k games < 5 s
-- [ ] Paired A/B with common random numbers
+- [x] Paired A/B with common random numbers (v0 done in Phase 1; extend to the full metric set)
 - [ ] Land sweep, ramp sweep, card impact ranking (leave-one-out), bracket speed check
 - [ ] Mulligan guide (hand features → outcome model → plain-language rules)
 - [ ] Sanity/regression decks (a precon, a Bracket 4 list) with snapshot tests

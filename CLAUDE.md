@@ -10,6 +10,15 @@ Read these before starting work:
 - `docs/SIMULATION.md` — goldfish lab + Forge pod lab design (high-priority feature; be thorough here)
 - `docs/DECISIONS.md` — decisions already made; don't reopen them without asking
 
+## Current state (keep this section up to date)
+
+- **Phase 0** is current; nothing that touches SQL Server, Scryfall or EDHREC exists yet. First tasks: Tooling
+  (lint, `.env`, SQL connection, migration runner), then the Scryfall importer.
+- Built early (2026-10-11), tested, no data access needed: `packages/rules` (deck parser/exporter, validator,
+  bracket rules) and `packages/sim` goldfish v0 (mulligans, lands/mana, commander turn, paired A/B).
+  Details, decisions and things to verify against real data: `docs/phases/phase-1.md`.
+- `npm run check` = typecheck + tests (47 passing at last update).
+
 ## Golden rules
 
 1. **The AI never invents cards.** Every card in a deck must resolve to a row in `card` (by oracle_id).
