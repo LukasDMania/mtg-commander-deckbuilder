@@ -6,8 +6,9 @@ passes.** Work tasks top to bottom; tick `[x]` when done; log surprises in `docs
 Current phase: **Phase 0** — start with the Tooling and Scryfall tasks.
 
 Done early (2026-10-11, from a cloud session without access to card data): the pure-logic parts of Phase 1
-— deck parser/exporter, validator, bracket rules, goldfish v0. See `docs/phases/phase-1.md` for what was built,
-what's left, and what must be verified against real data.
+— deck parser/exporter, validator, bracket rules, goldfish v0 — and most of the Phase 2 goldfish lab (simulator v1
+and tuning tools). See `docs/phases/phase-1.md` and `docs/phases/phase-2.md` for what was built, what's left, and
+what must be verified against real data.
 
 ---
 
@@ -88,7 +89,8 @@ Goldfish v0 (`packages/sim`, early slice — see `docs/SIMULATION.md`)
 - [x] Seeded RNG, London + free mulligan, land/mana-only simulation; screw/flood/mana-by-turn metrics
 - [x] Hypergeometric validation tests
 - [x] Paired A/B with common random numbers (`compareGoldfish`) — pulled forward from Phase 2
-- [ ] Map real cards to v0 `SimCard` kinds (land / rock / dork / ramp / spell) from role tags + oracle text
+- [ ] Map real cards to `SimCard` profiles (kinds: land, rock, dork, ramp, draw, engine, tutor, reducer, creature,
+      interaction, spell; colors, pips, power, evasion) from role tags + oracle text; combos from Spellbook
 
 MCP server (`apps/server`)
 - [ ] MCP server (stdio) registered in Claude Desktop config; tools: `get_commander`, `get_edhrec_cards`,
@@ -108,13 +110,17 @@ Record how much Pro usage a full build takes.
 ## Phase 2 — Simulation lab (weeks 10–16)
 
 Goldfish lab (full — `docs/SIMULATION.md` Part A)
-- [ ] Sim profiles: auto from tags + oracle parsers; LLM-assisted tagging cache; manual overrides; coverage %
-- [ ] Full game loop: ramp, rocks/dorks, draw bursts/engines, tutors, cost reducers, commander + tax, combo/win-con
-      assembly, combat clock, held interaction
-- [ ] Metrics with P10/P50/P90 + bootstrap CIs; consistency score; worker_threads; 10k games < 5 s
+- [x] Sim profile model (`SimCard` v1) — the card side; see `docs/SIMULATION.md` A1
+- [ ] Sim profiles from real data: auto from tags + oracle parsers; LLM-assisted tagging cache; manual overrides;
+      coverage %
+- [x] Full game loop: colored mana, ramp, rocks/dorks, draw bursts/engines, tutors, cost reducers, commander, combo
+      assembly, combat clock with commander damage, held interaction (commander tax is moot in a goldfish)
+- [x] Metrics with P10/P50/P90 + 95% CIs (normal/Wilson); per-card drawn/cast/dead rates; 10k games ≈ 1 s
+- [ ] Bootstrap CIs for percentiles; consistency score; worker_threads
 - [x] Paired A/B with common random numbers (v0 done in Phase 1; extend to the full metric set)
-- [ ] Land sweep, ramp sweep, card impact ranking (leave-one-out), bracket speed check
-- [ ] Mulligan guide (hand features → outcome model → plain-language rules)
+- [x] Land sweep, card impact ranking (leave-one-out, paired), bracket speed check
+- [ ] Ramp sweep (same pattern as the land sweep)
+- [x] Mulligan guide (hand features → good-game rate vs fresh 7 / 6-card baselines → plain-language rules)
 - [ ] Sanity/regression decks (a precon, a Bracket 4 list) with snapshot tests
 
 Pod lab (Forge — Part B)

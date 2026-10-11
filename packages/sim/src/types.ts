@@ -1,32 +1,93 @@
 /**
- * Goldfish v0 card model: only what matters for lands and mana. Everything that isn't a land or a mana source
- * is a 'spell' with a mana value. Phase 2 replaces this with full sim profiles (docs/SIMULATION.md A1).
+ * Goldfish card model ("sim profile", docs/SIMULATION.md A1). Explicit and small on purpose: each card says only
+ * what the simulator needs. Built from real card data by packages/data (Phase 1/2); hand-made in tests.
  */
-export type SimCardKind = 'land' | 'rock' | 'dork' | 'ramp' | 'spell';
+export type SimCardKind =
+  | 'land'
+  | 'rock' //        mana artifact: produces mana the turn it's cast
+  | 'dork' //        mana creature: produces mana from next turn (summoning sick)
+  | 'ramp' //        spell that fetches basic lands to battlefield and/or hand
+  | 'draw' //        one-shot card draw (Harmonize)
+  | 'engine' //      permanent that draws extra cards each turn (Phyrexian Arena)
+  | 'tutor' //       finds the best missing card and puts it in hand
+  | 'reducer' //     permanent that reduces generic costs (Dragonspeaker Shaman)
+  | 'creature' //    attacks for damage (combat clock)
+  | 'interaction' // removal / counterspells / protection: held, never cast in a goldfish
+  | 'spell' //       anything else; cast with spare mana
+  | 'blank'; //      does nothing and is never cast (used by card-impact analysis)
+
+/** 'W' | 'U' | 'B' | 'R' | 'G' and 'C' for colorless mana. */
+export type ManaColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C';
+export type Pips = Partial<Record<Exclude<ManaColor, 'C'>, number>> & { C?: number };
 
 export interface SimCard {
   name: string;
   kind: SimCardKind;
+  /** Total mana value (generic part = manaValue − sum of pips). */
   manaValue: number;
-  /** land: enters the battlefield tapped. */
+  /** Colored mana symbols in the cost, e.g. { G: 1 } for Cultivate. `C` = specifically colorless. */
+  pips?: Pips;
+  /** Tags used by reducers and tutors (creature types, "dragon", …). */
+  tags?: string[];
+  /** Stays on the battlefield after being cast. Defaults: true except draw, tutor, interaction, ramp. */
+  permanent?: boolean;
+
+  // ---- lands ----
   entersTapped?: boolean;
-  /** land: a basic land (ramp spells can fetch it from the library). */
   basic?: boolean;
-  /** rock/dork: mana produced per turn (default 1). Rocks produce the turn they're cast; dorks from next turn. */
+  /**
+   * Colors this land / rock / dork can produce, as a string: 'G', 'WU', 'C', 'WUBRG' (any color).
+   * Default: 'C'. With no pips anywhere in the deck, colors don't matter.
+   */
+  colors?: string;
+
+  // ---- mana sources ----
+  /** rock/dork: mana per turn (default 1). */
   produces?: number;
-  /** ramp: basic lands put onto the battlefield from the library (default 1). */
+  /** ramp: basics to battlefield (default 1), tapped (default true), and basics to hand (default 0). */
   rampLands?: number;
-  /** ramp: those lands enter tapped (default true). */
   rampTapped?: boolean;
-  /** ramp: basic lands put into hand from the library (e.g. Cultivate: 1). */
   rampToHand?: number;
+
+  // ---- card flow ----
+  /** draw: cards drawn on cast. engine: extra cards drawn each turn after it's on the battlefield. */
+  draws?: number;
+
+  // ---- reducers ----
+  /** Generic mana reduced for matching spells (all spells when reducesTag is unset). */
+  reduces?: number;
+  reducesTag?: string;
+
+  // ---- creatures / combat ----
+  power?: number;
+  /** Share of this creature's damage that gets through (0–1). Default: options.groundUnblockedShare. */
+  evasion?: number;
+  haste?: boolean;
+}
+
+export interface CommanderInfo {
+  name: string;
+  manaValue: number;
+  pips?: Pips;
+  tags?: string[];
+  power?: number;
+  evasion?: number;
+  haste?: boolean;
+}
+
+export interface Combo {
+  name: string;
+  /** Card names; the commander's name counts as a piece once it's on the battlefield. */
+  pieces: string[];
 }
 
 export interface SimDeck {
   /** Commander (cast from the command zone; not in the library). Omit to skip commander metrics. */
-  commander?: { name: string; manaValue: number };
+  commander?: CommanderInfo;
   /** The library: 99 cards (98 with partners). Order matters only for paired A/B (see runner). */
   library: SimCard[];
+  /** Win-the-game combos; the game is won the turn all pieces are assembled (see game loop). */
+  combos?: Combo[];
 }
 
 export interface KeepContext {
@@ -34,6 +95,8 @@ export interface KeepContext {
   mulligans: number;
   /** Cards that will remain after bottoming if this hand is kept. */
   keepCount: number;
+  /** Colors the commander's cost needs (helps policies judge color coverage). */
+  commanderColors: string;
 }
 
 /** Return true to keep this 7-card hand. */
@@ -56,8 +119,19 @@ export interface GameOptions {
   /** Turn on which to judge flood: share of lands among cards seen ≥ floodShare. Default turn 7, 0.55. */
   floodTurn: number;
   floodShare: number;
+  /** Share of a creature's power that connects when it has no `evasion` value. Default 0.5. */
+  groundUnblockedShare: number;
+  /** Opponents and their life total (Commander: 3 opponents at 40). */
+  opponents: number;
+  startingLife: number;
   /** For unit tests: don't shuffle; draw the library in the given order. */
   noShuffle?: boolean;
+}
+
+/** Per library position: first turn the card was in hand (0 = opening hand) and turn it was cast; -1 = never. */
+export interface CardTrace {
+  drawnTurn: Int8Array;
+  castTurn: Int8Array;
 }
 
 export interface GameResult {
@@ -71,9 +145,29 @@ export interface GameResult {
   manaSpent: number[];
   landsSeen: number[];
   cardsSeen: number[];
+  /** Cumulative damage dealt to opponents by the end of turn t. */
+  damageDealt: number[];
   /** Turn the commander was first cast, or null if not within maxTurns. */
   commanderTurn: number | null;
+  /** First turn an engine (draw engine or reducer) was on the battlefield. */
+  engineTurn: number | null;
+  /** Turn a combo was assembled (game won), or null. */
+  comboTurn: number | null;
+  comboName: string | null;
+  /** Turn the first opponent was eliminated by combat / commander damage. */
+  firstKillTurn: number | null;
+  /** Turn all opponents were eliminated by combat / commander damage. */
+  tableKillTurn: number | null;
+  /** min(comboTurn, tableKillTurn): the turn this deck wins unopposed, or null within maxTurns. */
+  winTurn: number | null;
   landDropsMissedByScrewTurn: number;
   screwed: boolean;
+  /** On the screw turn, a card was affordable by amount but not castable because of colors. */
+  colorScrewed: boolean;
   flooded: boolean;
+  /** Interaction cards held in hand at the end of each turn. */
+  heldInteraction: number[];
+  /** The kept 7-card opening hand before bottoming (for the mulligan guide). Library indexes. */
+  openingHand: number[];
+  trace: CardTrace;
 }

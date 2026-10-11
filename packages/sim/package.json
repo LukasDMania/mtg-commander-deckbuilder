@@ -6,5 +6,10 @@
   "description": "Goldfish lab: seeded game simulator, metrics, sweeps, A/B, card impact, mulligan guide",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": { "build": "tsc -b" }
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@cdb/rules": "*"
+  }
 }

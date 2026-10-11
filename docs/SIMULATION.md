@@ -18,14 +18,16 @@ Two engines, used for different questions:
 
 | Piece | State |
 | --- | --- |
-| Goldfish v0 (`packages/sim`): RNG, mulligans, lands/rocks/dorks/ramp, commander turn, screw/flood, mana by turn, paired A/B | **Built 2026-10-11**, validated against hypergeometric math, ~0.2 s per 10k games |
-| Card → `SimCard` mapping from real data | Phase 1 (needs the card DB) |
-| Full sim profiles, win-con/combo assembly, combat clock, draw engines, tutors | Phase 2 |
-| Sweeps, card impact, mulligan guide, worker threads | Phase 2 |
+| Goldfish engine v1 (`packages/sim`): colored mana (pips + matching payment), mulligans, lands/rocks/dorks/ramp, draw + engines, tutors, cost reducers, creatures + combat clock (commander damage, overflow, haste, evasion), combos (incl. commander as a piece, held non-permanent pieces), held interaction | **Built 2026-10-11**, 54 sim tests, exact-math validated |
+| Metrics: win turn (combo / table kill), first kill, commander turn, engine online, screw, color screw, flood, mana by turn, damage by turn, per-card drawn/cast/dead rates | Built |
+| Paired A/B (`compareGoldfish`), land sweep, card impact, mulligan guide, bracket speed check | Built |
+| Real cards → `SimCard` profiles, Spellbook combos → `combos` | Needs the card DB (Phase 1/2) |
+| Ramp sweep, consistency score, bootstrap CIs, worker threads | Phase 2 |
 | Forge pod lab | Phase 2 |
 
-API today: `runGoldfish(deck, { games, seed, maxTurns, keepPolicy, ... })`, `compareGoldfish(a, b, opts)`,
-`playGame(deck, rng, opts)`, stats helpers (`summarize`, `proportion`, `pairedDifference`, `hypergeomPmf`).
+API: `runGoldfish(deck, opts)`, `compareGoldfish(a, b, opts)`, `landSweep(deck, opts)`, `cardImpact(deck, opts)`,
+`mulliganGuide(deck, opts)`, `bracketSpeedCheck(report, bracket)`, `playGame(deck, rng, opts)`, mana helpers
+(`costOf`, `findPayment`), stats helpers. See `packages/sim/README.md`.
 
 ---
 
@@ -33,7 +35,8 @@ API today: `runGoldfish(deck, { games, seed, maxTurns, keepPolicy, ... })`, `com
 
 ### A1. Card simulation profiles
 
-Every card gets a **sim profile**: a small, explicit model of what it does for the simulator. Stored in
+Every card gets a **sim profile**: a small, explicit model of what it does for the simulator. Implemented as
+`SimCard` in `packages/sim/src/types.ts` (the table below is the design; the type is the source of truth). Stored in
 `sim_profile` (one row per oracle_id), built automatically, overridable by hand.
 
 | Field | Meaning | Example |
@@ -112,16 +115,21 @@ Always distributions, never just means: P10 / P50 / P90 and the full histogram.
 
 ### A6. Tools built on the goldfish lab
 
-1. **Land count sweep** — run 33…40 lands (swapping lands for the weakest nonlands), plot screw/flood/win-con turn;
-   recommend the knee of the curve.
+1. **Land count sweep** (built) — fewer lands: basics become average-MV filler spells; more lands: the highest-MV plain
+   spells/creatures become basics; same positions, so every row is paired against the current deck. Recommends the
+   fewest lands within noise of the best row. Default objective: win turn if the deck wins in ≥ 20% of goldfish
+   games, else **total mana spent** (punishes screw and flood; "commander turn" alone favours ever more lands).
 2. **Ramp sweep** — same for ramp pieces 6…14.
 3. **Swap A/B** — "Cultivate → Arcane Signet": paired comparison on every metric.
-4. **Card impact ranking** — leave-one-out: replace each nonland with a blank card, measure Δ in consistency score
-   and win-con turn. Ranks the deck's real all-stars and its filler; feeds the critic pass.
-5. **Mulligan guide** — log opening-hand features (lands, cheap ramp, colors, key pieces) and game outcome; fit a
-   simple model (logistic regression) and turn it into plain rules ("keep 2-landers only with Sol Ring or 2 ramp").
-6. **Bracket speed check** — flags "too fast for Bracket 2" or "too slow for Bracket 4" from the win-con turn
-   distribution.
+4. **Card impact ranking** (built) — leave-one-out: replace all copies of a card with a blank, replay the same games,
+   measure Δ objective with a 95% CI. Ranks the deck's real all-stars and its filler; feeds the critic pass.
+   Basics and interaction (never cast in a goldfish) are skipped.
+5. **Mulligan guide** (built) — keep every 7, bucket hands by lands × cheap mana sources, compare each bucket's
+   good-game rate with a fresh 7 (free mulligan) and with an average 6-card hand → plain rules. "Good game" = wins by
+   the median win turn, or spends ≥ median mana by turn 6, or (option) commander by the median turn. Next: add
+   color coverage and key pieces as features.
+6. **Bracket speed check** (built) — share of goldfish games won before the bracket's minimum turn; > 10% →
+   "too fast". Bracket 4 also has a 4-turn minimum; only cEDH has none.
 7. **Meme mode sanity** — confirms a meme deck still functions (screw rate, can it ever assemble its joke?).
 
 ### A7. Performance and validation

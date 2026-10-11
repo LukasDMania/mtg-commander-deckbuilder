@@ -14,10 +14,12 @@ Read these before starting work:
 
 - **Phase 0** is current; nothing that touches SQL Server, Scryfall or EDHREC exists yet. First tasks: Tooling
   (lint, `.env`, SQL connection, migration runner), then the Scryfall importer.
-- Built early (2026-10-11), tested, no data access needed: `packages/rules` (deck parser/exporter, validator,
-  bracket rules) and `packages/sim` goldfish v0 (mulligans, lands/mana, commander turn, paired A/B).
-  Details, decisions and things to verify against real data: `docs/phases/phase-1.md`.
-- `npm run check` = typecheck + tests (47 passing at last update).
+- Built early (2026-10-11), tested, no data access needed:
+  - `packages/rules`: deck parser/exporter, validator, bracket rules → `docs/phases/phase-1.md`
+  - `packages/sim`: goldfish engine v1 (colors, ramp, draw, tutors, reducers, combat clock, combos, per-card stats)
+    and tools (paired A/B, land sweep, card impact, mulligan guide, bracket speed check) → `docs/phases/phase-2.md`
+  - What's missing for both is real card data: mapping Scryfall cards to `CardInfo` and `SimCard` profiles.
+- `npm run check` = typecheck + tests (68 passing at last update).
 
 ## Golden rules
 
