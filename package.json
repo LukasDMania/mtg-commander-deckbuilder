@@ -1,0 +1,19 @@
+{
+  "name": "mtg-commander-deckbuilder",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Personal AI Commander (EDH) deck builder: Scryfall + EDHREC data, SQL Server, MCP tools for Claude, simulation lab, web app",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "typecheck": "tsc -b",
+    "test": "vitest run --passWithNoTests",
+    "check": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^22.0.0"
+  }
+}

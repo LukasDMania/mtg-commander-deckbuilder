@@ -1,0 +1,10 @@
+{
+  "name": "@cdb/rules",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deck model, parsers/exporters, validator, bracket rules, mana base builder (pure, no I/O)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -b" }
+}

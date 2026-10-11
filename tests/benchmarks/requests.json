@@ -1,0 +1,38 @@
+{
+  "_about": "Phase 1 gate: every request must produce a deck that passes every hard rule. Re-run after every engine change. Commanders chosen to cover popular, niche, meme and tight-budget cases; adjust freely, but keep the categories.",
+  "requests": [
+    { "id": "pop-01", "category": "popular", "commander": "Atraxa, Praetors' Voice", "bracket": 2, "budget_eur": 150, "plan": "+1/+1 counters and proliferate" },
+    { "id": "pop-02", "category": "popular", "commander": "Atraxa, Praetors' Voice", "bracket": 3, "budget_eur": 300, "plan": "superfriends / proliferate" },
+    { "id": "pop-03", "category": "popular", "commander": "The Ur-Dragon", "bracket": 2, "budget_eur": 150, "plan": "dragon tribal" },
+    { "id": "pop-04", "category": "popular", "commander": "The Ur-Dragon", "bracket": 3, "budget_eur": 300, "plan": "dragon tribal with cost reduction" },
+    { "id": "pop-05", "category": "popular", "commander": "Yuriko, the Tiger's Shadow", "bracket": 2, "budget_eur": 150, "plan": "ninjutsu with evasive creatures" },
+    { "id": "pop-06", "category": "popular", "commander": "Yuriko, the Tiger's Shadow", "bracket": 3, "budget_eur": 300, "plan": "ninjas + high-MV topdeck manipulation" },
+    { "id": "pop-07", "category": "popular", "commander": "Muldrotha, the Gravetide", "bracket": 2, "budget_eur": 150, "plan": "self-mill value" },
+    { "id": "pop-08", "category": "popular", "commander": "Muldrotha, the Gravetide", "bracket": 3, "budget_eur": 300, "plan": "graveyard recursion engine" },
+    { "id": "pop-09", "category": "popular", "commander": "Kaalia of the Vast", "bracket": 2, "budget_eur": 150, "plan": "angels, demons, dragons into play" },
+    { "id": "pop-10", "category": "popular", "commander": "Kaalia of the Vast", "bracket": 3, "budget_eur": 300, "plan": "fast Kaalia attacks with protection" },
+
+    { "id": "niche-01", "category": "niche", "commander": "Grenzo, Havoc Raiser", "bracket": 3, "budget_eur": 150, "plan": "goad everything, steal value from forced attacks" },
+    { "id": "niche-02", "category": "niche", "commander": "Gisa and Geralf", "bracket": 2, "budget_eur": 120, "plan": "zombie tribal self-mill" },
+    { "id": "niche-03", "category": "niche", "commander": "Obeka, Brute Chronologist", "bracket": 3, "budget_eur": 150, "plan": "end the turn to cash in 'end step' and 'sacrifice at end of turn' effects" },
+    { "id": "niche-04", "category": "niche", "commander": "The Gitrog Monster", "bracket": 3, "budget_eur": 200, "plan": "lands matter, discard lands, dredge" },
+    { "id": "niche-05", "category": "niche", "commander": "Sythis, Harvest's Hand", "bracket": 2, "budget_eur": 120, "plan": "enchantress, pacifism-style auras" },
+    { "id": "niche-06", "category": "niche", "commander": "Ghired, Conclave Exile", "bracket": 2, "budget_eur": 100, "plan": "populate tokens" },
+    { "id": "niche-07", "category": "niche", "commander": "Anowon, the Ruin Thief", "bracket": 2, "budget_eur": 100, "plan": "rogue tribal mill" },
+    { "id": "niche-08", "category": "niche", "commander": "Henzie \"Toolbox\" Torre", "bracket": 3, "budget_eur": 150, "plan": "blitz big ETB/death-trigger creatures" },
+    { "id": "niche-09", "category": "niche", "commander": "Arcades, the Strategist", "bracket": 2, "budget_eur": 120, "plan": "defenders and walls attack with toughness" },
+    { "id": "niche-10", "category": "niche", "commander": "Gonti, Lord of Luxury", "bracket": 3, "budget_eur": 150, "plan": "theft: play opponents' cards" },
+
+    { "id": "meme-01", "category": "meme", "commander": "Grolnok, the Omnivore", "bracket": 2, "budget_eur": 100, "plan": "frogs only: every creature is a Frog or has a frog in the art" },
+    { "id": "meme-02", "category": "meme", "commander": "Chatterfang, Squirrel General", "bracket": 2, "budget_eur": 100, "plan": "only squirrels, nuts and food" },
+    { "id": "meme-03", "category": "meme", "commander": "The Ur-Dragon", "bracket": 2, "budget_eur": 150, "plan": "every nonland card shows a dragon in the art, including non-dragon spells" },
+    { "id": "meme-04", "category": "meme", "commander": "Rin and Seri, Inseparable", "bracket": 2, "budget_eur": 100, "plan": "cats and dogs only, nothing else with a creature type" },
+    { "id": "meme-05", "category": "meme", "commander": "Phelddagrif", "bracket": 2, "budget_eur": 80, "plan": "group hug that secretly still wins" },
+
+    { "id": "budget-01", "category": "budget", "commander": "Krenko, Mob Boss", "bracket": 2, "budget_eur": 50, "plan": "goblin tokens" },
+    { "id": "budget-02", "category": "budget", "commander": "Lathril, Blade of the Elves", "bracket": 3, "budget_eur": 60, "plan": "elf tokens and drain" },
+    { "id": "budget-03", "category": "budget", "commander": "Chulane, Teller of Tales", "bracket": 3, "budget_eur": 100, "plan": "creature bounce value" },
+    { "id": "budget-04", "category": "budget", "commander": "Prosper, Tome-Bound", "bracket": 3, "budget_eur": 75, "plan": "exile-and-play, treasure" },
+    { "id": "budget-05", "category": "budget", "commander": "Teysa Karlov", "bracket": 2, "budget_eur": 50, "plan": "double death triggers, aristocrats" }
+  ]
+}

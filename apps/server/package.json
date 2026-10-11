@@ -1,0 +1,10 @@
+{
+  "name": "@cdb/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local server: REST API for the web app + MCP server for Claude Desktop",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -b" }
+}

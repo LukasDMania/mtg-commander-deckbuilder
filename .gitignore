@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+# raw downloads (Scryfall bulk files, full EDHREC pages) — never commit
+data/raw/
+*.json.gz
+# Forge install and outputs
+tools/forge/forge/
+tools/forge/out/
+coverage/
+.DS_Store

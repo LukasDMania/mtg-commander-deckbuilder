@@ -1,0 +1,10 @@
+{
+  "name": "@cdb/data",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SQL Server access and importers: Scryfall, EDHREC, Commander Spellbook, Archidekt; candidate pools",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -b" }
+}
