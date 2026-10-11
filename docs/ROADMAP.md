@@ -34,6 +34,12 @@ EDHREC (see `docs/EDHREC.md`)
 Commander Spellbook
 - [ ] Import combos (`combo`, `combo_card`) incl. bracket tags; wrapper for `estimate-bracket` and `find-my-combos`
 
+Deck corpus (real human decks — `docs/PLAN.md` §4b)
+- [ ] Explore Archidekt's public JSON API on the PC (search by commander/format, deck fetch); confirm where the
+      player-set bracket, tags, views and likes live; document in `docs/phases/phase-0.md`
+- [ ] Sampler: per commander, up to ~300 recent, complete, legal decks with a player-set bracket →
+      `corpus_deck`, `corpus_deck_card` (polite pacing, cache)
+
 Roles
 - [ ] Role tagging v1 from Scryfall function tags (`otag:`) for: ramp, mana-rock, mana-dork, card-draw, removal,
       board-wipe, counterspell, tutor, protection, recursion, sacrifice-outlet, token-maker, cost-reducer,
@@ -59,7 +65,9 @@ Rules (`packages/rules`, test-first)
 Candidate pools (`packages/data`)
 - [ ] Pool builder: identity + legality + bracket + per-card price ceiling; EDHREC (commander × bracket × theme)
       ranked by inclusion and lift; Scryfall role tags; owned-card boost; score per card
-- [ ] Discovery candidates: low-inclusion / high-lift + semantic matches
+- [ ] Discovery candidates: low-inclusion / high-lift + semantic matches + unusual cards from well-liked corpus decks
+- [ ] Corpus stats: role counts and curves per commander × bracket (feeds brief role targets); card-to-card lift
+      within a commander's decks (packages and anti-synergies)
 - [ ] Embeddings: local model (transformers.js) → `card_embedding` (`VECTOR`); `semantic_search`
 - [ ] Meme mode search: names, flavor text, creature types, Scryfall art tags; theme-fidelity score
 
@@ -97,7 +105,8 @@ Goldfish lab (full — `docs/SIMULATION.md` Part A)
 Pod lab (Forge — Part B)
 - [ ] Install Forge locally; confirm sim-mode command and flags; `.dck` exporter
 - [ ] Job queue (`sim_job`) + runner (parallel JVMs, timeouts) + log parser → `sim_game`
-- [ ] Reference gauntlets per bracket (precons, EDHREC average decks by bracket, EDHTop16 for B5)
+- [ ] Reference gauntlets per bracket (precons, real corpus decks by bracket, EDHREC average decks as filler,
+      EDHTop16 for B5)
 - [ ] Seat rotation, win rate with CI, win-turn distribution, end-reason breakdown, TrueSkill-style rating
 - [ ] Report Forge-unsupported / AI-unplayable cards per deck
 - [ ] Overnight batch command
@@ -127,6 +136,7 @@ Forge pod ratings run overnight for ≥ 10 decks with sensible bracket ordering.
 - [ ] Optional API-key mode: one-click build in the web app (same pipeline, server-side), prompt caching
 - [ ] Preferences learned from the play log (pet cards, disliked cards, preferred land counts)
 - [ ] Calibrate pod-lab power score against real play log
-- [ ] Hide-and-predict test on 50 human decks; blind comparisons with the playgroup
+- [ ] Hide-and-predict test on 50 human corpus decks; blind comparisons with the playgroup
+- [ ] Bracket model trained on corpus decks' player-set brackets; flag disagreements with our rule-based label
 
 **Gate 4:** blind tests prefer the engine's deck over the EDHREC average deck ≥ 60% of the time.

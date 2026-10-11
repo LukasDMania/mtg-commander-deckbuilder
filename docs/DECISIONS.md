@@ -13,3 +13,4 @@
 | 2026-10-11 | Prices = Cardmarket € via Scryfall `prices.eur`, cheapest printing | Owner buys in Belgium | TCGplayer / Card Kingdom USD |
 | 2026-10-11 | Simulation lab is a full phase: goldfish (own engine) + Forge 1v1v1v1 pods | Measured averages over thousands of games are the highest-return feature | Heuristic power scores only |
 | 2026-10-11 | Forge runs as a separate process | Copyleft licence + crash isolation | Embedding Forge code |
+| 2026-10-11 | Keep a corpus of real human decks (Archidekt sample + tournament lists) as a calibration layer | EDHREC averages hide role counts, card packages and coherent decks; needed for Forge gauntlets, bracket model and tests | Relying on EDHREC averages alone |

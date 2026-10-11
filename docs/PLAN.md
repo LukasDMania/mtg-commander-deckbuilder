@@ -74,6 +74,26 @@ The apps never call external sites directly; a source going down never breaks a 
 If ever released: Wizards' Fan Content Policy requires free access (ads/donations OK) and an "unofficial" notice;
 Scryfall forbids paywalling its data.
 
+### 4b. Deck corpus (real human decks)
+
+EDHREC already *is* aggregated human decks, so it does the heavy lifting for "which cards". A corpus of
+individual decks adds what averages hide. It is a calibration layer, not the main signal.
+
+| Use | What the corpus gives that EDHREC averages don't | Phase |
+| --- | --- | --- |
+| Role targets | Real land / ramp / draw / removal counts and curves per bracket and archetype, instead of rules of thumb | 1 |
+| Card packages | Card-to-card lift *within* one commander's decks (which cards travel together, which exclude each other) | 1 |
+| Discovery picks | Unusual cards that show up in well-liked decks (high views/likes) but not in averages | 1 |
+| Forge opponents | Real, coherent decks per bracket for the pod-lab gauntlets (averages can be incoherent) | 2 |
+| Bracket check | A model trained on decks players labelled B1–B5; flags when our label disagrees with how humans label similar decks | 4 |
+| Hide-and-predict test | The test set for the quality benchmark | 4 |
+| Insurance | Own inclusion and lift stats if EDHREC blocks or changes its JSON | any |
+
+Sources: Archidekt public decks (player-set bracket, tags, views; max 1,000 per search) as the main sample;
+EDHTop16/TopDeck.gg tournament lists for Brackets 4–5; Moxfield only via paste. Sampling: for each commander in
+use, up to ~300 decks with a player-set bracket, recent (last 12 months) and complete (100 cards, legal);
+weight by views/likes as a rough quality signal. Stored in `corpus_deck` / `corpus_deck_card`; refreshed monthly.
+
 ## 5. Deck engine (pipeline)
 
 1. **Intake.** Commander (or partners/background), € budget, bracket, game plan or vibe, collection on/off,

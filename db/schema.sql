@@ -153,6 +153,36 @@ CREATE INDEX ix_edhrec_stat_lookup ON dbo.edhrec_card_stat(commander_slug, brack
     INCLUDE (oracle_id, num_decks, potential_decks, lift);
 GO
 
+/* ---------- Deck corpus: real human decks (docs/PLAN.md §4b) ---------- */
+
+CREATE TABLE dbo.corpus_deck (
+    corpus_deck_id  INT IDENTITY(1,1) PRIMARY KEY,
+    source          VARCHAR(20)      NOT NULL,      -- archidekt | topdeck | edhtop16 | manual
+    source_deck_id  VARCHAR(64)      NOT NULL,
+    commander_slug  VARCHAR(200)     NULL REFERENCES dbo.commander(slug),
+    commander_id    UNIQUEIDENTIFIER NULL REFERENCES dbo.card(oracle_id),
+    partner_id      UNIQUEIDENTIFIER NULL REFERENCES dbo.card(oracle_id),
+    player_bracket  TINYINT          NULL,          -- bracket the deck's owner set
+    tags_json       NVARCHAR(MAX)    NULL,
+    views           INT              NULL,
+    likes           INT              NULL,
+    is_complete     BIT              NOT NULL DEFAULT 0,   -- 100 cards + passes our validator
+    deck_updated_at DATETIME2(0)     NULL,
+    fetched_at      DATETIME2(0)     NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT ux_corpus_source UNIQUE (source, source_deck_id)
+);
+CREATE INDEX ix_corpus_commander ON dbo.corpus_deck(commander_slug, player_bracket);
+
+CREATE TABLE dbo.corpus_deck_card (
+    corpus_deck_id  INT              NOT NULL REFERENCES dbo.corpus_deck(corpus_deck_id),
+    oracle_id       UNIQUEIDENTIFIER NOT NULL REFERENCES dbo.card(oracle_id),
+    qty             TINYINT          NOT NULL DEFAULT 1,
+    source_category NVARCHAR(100)    NULL,          -- the deck owner's own category label, if any
+    PRIMARY KEY (corpus_deck_id, oracle_id)
+);
+CREATE INDEX ix_corpus_card_oracle ON dbo.corpus_deck_card(oracle_id);
+GO
+
 /* ---------- Combos (Commander Spellbook) ---------- */
 
 CREATE TABLE dbo.combo (
